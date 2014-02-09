@@ -1,0 +1,136 @@
+#ifndef RAY_TRACER_H
+#define RAY_TRACER_H
+
+#include "Rays/Ray.h"
+#include "Primitives/Sphere.h"
+#include <cmath>
+#include "simplePPM/simplePPM.h"
+#include "obj/objLoader.h"
+#include <vector>
+#include "Scene.h"
+
+using namespace std;
+
+class RayTracer
+{
+public:
+
+    RayTracer()
+    {
+        this->colorByNormal = false;
+
+    }
+
+    ~RayTracer()
+    {
+    }
+
+    void drawFrameBuffer(char *fileName)
+    {
+        simplePPM_write_ppm(fileName, this->frameBuffer.getWidth(), this->frameBuffer.getHeight(), (unsigned char *)&this->frameBuffer.at(0, 0));
+    }
+
+    void setFrameBuffer(unsigned int w, unsigned int h)
+    {
+        this->frameBuffer = Buffer(w, h);
+    }
+
+    void processOBJ(char *fileName)
+    {
+        this->scene.parseObjFile(fileName);
+    }
+
+    void renderRayDirectionsToImage(char *fileName)
+    {
+        RayGenerator rg = RayGenerator(this->scene.getCamera(), this->frameBuffer.getWidth(), this->frameBuffer.getHeight());
+        printf("tracing ray colors\n");
+	drawRaysToBuffer(this->frameBuffer, rg);
+        printf("done with tracing\n");
+        drawFrameBuffer(fileName);
+        printf("writing out the image\n");
+    }
+
+private:
+    Buffer frameBuffer;
+    Scene scene;
+    bool colorByNormal;
+
+    void drawRaysToBuffer(Buffer &b, RayGenerator &rg)
+    {
+        unsigned int h = b.getHeight();
+        unsigned int w = b.getWidth();
+        for (int y = 0; y < h; y++)
+        {
+            for (int x = 0; x < w; x++)
+            {
+                Ray r = rg.getRayAt(x, y);
+                Color c = traceRay(r);
+                Color &buffColor = this->frameBuffer.at(x, h - y);
+                buffColor[0] = c[0]; buffColor[1] = c[1]; buffColor[2] = c[2];
+            }
+
+        }
+    }
+
+
+    Color traceRay(Ray &ray)
+    {
+        this->scene.intersect(ray);
+        Hit hit = ray.getFirstHit();
+        float t = hit.getParam();
+
+        Color c;
+        c[0] = 255; c[1] = 255; c[2] = 255;
+        if (t > 0)
+        {
+            // ray got a hit!
+            Vector3 normal = hit.getHitNormal();
+            if (colorByNormal)
+            {
+                normal *= 255.0f;
+                c = Color(abs(normal[0]), abs(normal[1]), abs(normal[2]));
+            }
+            else
+            {
+                c = calculateLighting(hit, ray);
+            }
+        }
+        return c;
+    }
+
+    Color calculateLighting(Hit &hit, Ray &ray)
+    {
+        Color c;
+        Material *hitMaterial = this->scene.getMaterial(hit.getHitMaterialId());
+
+        if (hitMaterial != NULL)
+        {
+            Color ambient = hitMaterial->getAmbientColor();
+            c = ambient;
+        }
+        else
+        {
+            c[0] = 0; c[1] = 0; c[2] = 0;
+        }
+        vector<Ray>* lightRays = this->scene.getRaysToLights(ray.at(hit.getParam()));
+        int lrCount = lightRays->size();
+        for(int i=0; i < lrCount; i++){
+            Ray r = (*lightRays)[i];
+            this->scene.intersect(r);
+            if(r.getFirstHit().getParam() < 0){
+                // clear ray to light... light it up!
+                c = Color(255, 255, 255);
+            } else {
+                // ray hit something... let's have some shadow!
+            }
+        }
+        delete lightRays;
+        return c;
+    }
+
+
+};
+
+
+
+#endif
