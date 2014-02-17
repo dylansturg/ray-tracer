@@ -9,6 +9,7 @@
 #include "RayTracer.h"
 #include <time.h>
 #include <string.h>
+#include "TimeWrapper.h"
 
 #define DEFAULT_RESOLUTION 250
 
@@ -42,6 +43,8 @@ int main(int argc, char **argv)
         writeFileName = writeName;
     }
 
+	long startTime = GetElapsedMS();
+
     RayTracer tracer = RayTracer(colorByNormal);
 
     tracer.processOBJ(fileName);
@@ -50,6 +53,7 @@ int main(int argc, char **argv)
 
     tracer.renderRayDirectionsToImage(writeFileName);
 
+	printf("Time: %d(ms)\n", (GetElapsedMS() - startTime));
 
     return 0;
 }

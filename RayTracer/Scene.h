@@ -12,7 +12,6 @@
 #include <vector>
 #include "Primitives/BBVHTree.h"
 
-#include <sys/time.h>
 
 using namespace std;
 
@@ -23,14 +22,14 @@ public:
 	}
 
 	void parseObjFile(char *objFilename) {
-		struct timeval captureTime;
+		//struct timeval captureTime;
 		objLoader *objData = new objLoader();
 
-		gettimeofday(&captureTime, NULL);
-		long objStart = captureTime.tv_sec * 1000000 + captureTime.tv_usec;
+		//gettimeofday(&captureTime, NULL);
+		//long objStart = captureTime.tv_sec * 1000000 + captureTime.tv_usec;
 		objData->load(objFilename);
-		gettimeofday(&captureTime, NULL);
-		long objEnd = captureTime.tv_sec * 1000000 + captureTime.tv_usec;
+		//gettimeofday(&captureTime, NULL);
+		//long objEnd = captureTime.tv_sec * 1000000 + captureTime.tv_usec;
 
 		parseCamera(*objData);
 
@@ -42,13 +41,13 @@ public:
 		printf("finished parsing the obj file: %d surfaces\n",
 				this->surfaces.size());
 
-		gettimeofday(&captureTime, NULL);
-		long start = captureTime.tv_sec * 1000000 + captureTime.tv_usec;
+		//gettimeofday(&captureTime, NULL);
+		//long start = captureTime.tv_sec * 1000000 + captureTime.tv_usec;
 		this->objectTree.initializeTree(&this->surfaces);
-		gettimeofday(&captureTime, NULL);
-		long end = captureTime.tv_sec * 1000000 + captureTime.tv_usec;
-		printf("finished building scene tree of in %d usec, parsed obj in %d, total build time %d\n",
-				end - start, objEnd - objStart, end - objStart);
+		//gettimeofday(&captureTime, NULL);
+		//long end = captureTime.tv_sec * 1000000 + captureTime.tv_usec;
+		//printf("finished building scene tree of in %d usec, parsed obj in %d, total build time %d\n",
+				//end - start, objEnd - objStart, end - objStart);
 
 	}
 
