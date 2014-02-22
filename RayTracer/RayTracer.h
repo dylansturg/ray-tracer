@@ -20,6 +20,8 @@ public:
 
 	RayTracer(bool normColor) {
 		this->colorByNormal = false;
+
+		
 	}
 
 	~RayTracer() {
@@ -74,7 +76,7 @@ private:
 			}
 
 		}
-
+#pragma omp parallel for
 		for (int y = 1; y <= h; y++) {
 			for (int x = 0; x < w; x++) {
 
@@ -86,15 +88,14 @@ private:
 			}
 
 		}
-		printf("done writing colors\n");
 	}
 
 	Vector3 traceRay(Ray &ray) {
-		return traceRay(ray, 5);
+		return traceRay(ray, 25);
 	}
 
 	Vector3 traceRay(Ray &ray, int recursionDepth) {
-		if (recursionDepth >= 10) {
+		if (recursionDepth < 0) {
 			return Vector3(0, 0, 0);
 		}
 		this->scene.intersect(ray);

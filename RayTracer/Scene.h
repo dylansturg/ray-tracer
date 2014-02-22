@@ -12,13 +12,78 @@
 #include <vector>
 #include "Primitives/BBVHTree.h"
 
+#include <fstream>
+#include <stdio.h>
 
 using namespace std;
 
 class Scene {
 public:
-	Scene() {
 
+	Vector3 cameraUp, cameraLookingAt;
+
+	void parse(string binaryTrianglesFile, string binaryMaterialsFile, string binaryLightsFile, string binaryTreeFile, string binaryCameraFile)
+	{
+		fstream trianglesBinary(binaryTrianglesFile, ios::in | ios::binary);
+		this->surfaces->empty();
+		int index = 0;
+		while (!trianglesBinary.eof()){
+			this->surfaces->push_back(new Triangle());
+			trianglesBinary.read((char*)((this->surfaces->at(index))), sizeof(Triangle));
+			index++;
+		}
+		this->surfaces->pop_back(); // last one is extra, due to file reading junk
+		trianglesBinary.close();
+
+		fstream materialsBinary(binaryMaterialsFile, ios::in | ios::binary);
+		this->materials.empty();
+		index = 0;
+		while (!materialsBinary.eof()){
+			this->materials.push_back(Material());
+			materialsBinary.read((char*)(&this->materials[index]), sizeof(Material));
+			index++;
+		}
+		this->materials.pop_back();
+		materialsBinary.close();
+
+		fstream lightsBinary(binaryLightsFile, ios::in | ios::binary);
+		this->lights.empty();
+		index = 0;
+		while (!lightsBinary.eof()){
+			this->lights.push_back(Light());
+			lightsBinary.read((char*)(&this->lights[index]), sizeof(Light));
+			index++;
+		}
+		this->lights.pop_back();
+		lightsBinary.close();
+
+
+		fstream treeBinary(binaryTreeFile, ios::in | ios::binary);
+		vector<Node>* treeNodes = new vector<Node>();
+		index = 0;
+		while (!treeBinary.eof()){
+			treeNodes->push_back(Node());
+			treeBinary.read((char*)(&(*treeNodes)[index]), sizeof(Node));
+			index++;
+		}
+		treeNodes->pop_back();
+		treeBinary.close();
+
+		this->objectTree = BBVHTree(treeNodes);
+
+		fstream cameraBinary(binaryCameraFile, ios::in | ios::binary);
+		cameraBinary.read((char*)&(this->camera), sizeof(Camera));
+
+		cameraBinary.read((char*)&(this->cameraLookingAt), sizeof(Vector3));
+		cameraBinary.read((char*)&(this->cameraUp), sizeof(Vector3));
+
+		cameraBinary.close();
+
+
+	}
+
+	Scene() {
+		this->surfaces = new vector<Surface*>();
 	}
 
 	void parseObjFile(char *objFilename) {
@@ -39,11 +104,11 @@ public:
 		parseLights(*objData);
 		delete objData;
 		printf("finished parsing the obj file: %d surfaces\n",
-				this->surfaces.size());
+				this->surfaces->size());
 
 		//gettimeofday(&captureTime, NULL);
 		//long start = captureTime.tv_sec * 1000000 + captureTime.tv_usec;
-		this->objectTree.initializeTree(&this->surfaces);
+		this->objectTree.initializeTree(this->surfaces);
 		//gettimeofday(&captureTime, NULL);
 		//long end = captureTime.tv_sec * 1000000 + captureTime.tv_usec;
 		//printf("finished building scene tree of in %d usec, parsed obj in %d, total build time %d\n",
@@ -87,9 +152,46 @@ public:
 		return &this->lights[lightId];
 	}
 
+	void SceneToBinFiles(string binaryTrianglesFile, string binaryMaterialsFile, string binaryLightsFile, string binaryTreeFile, string binaryCameraFile){
+		fstream trianglesOut(binaryTrianglesFile, ios::binary | ios::out);
+
+		for (int i = 0; i < this->surfaces->size(); i++){
+			trianglesOut.write((char*)(this->surfaces->at(i)), sizeof(Triangle));
+		}
+
+		trianglesOut.close();
+
+		fstream materialsOut(binaryMaterialsFile, ios::binary | ios::out);
+		for (int i = 0; i < this->materials.size(); i++){
+			materialsOut.write((char*)(&this->materials[i]), sizeof(Material));
+		}
+		materialsOut.close();
+
+		fstream lightsOut(binaryLightsFile, ios::binary | ios::out);
+		for (int i = 0; i < this->lights.size(); i++){
+			lightsOut.write((char*)(&this->lights[i]), sizeof(Light));
+		}
+		lightsOut.close();
+
+		fstream treeOut(binaryTreeFile, ios::binary | ios::out);
+		vector<Node>* tree = this->objectTree.getNodeList();
+		for (int i = 0; i < tree->size(); i++){
+			treeOut.write((char*)(&(*tree)[i]), sizeof(Node));
+		}
+		treeOut.close();
+
+		fstream cameraOut(binaryCameraFile, ios::binary | ios::out);
+		cameraOut.write((char*)&(this->camera), sizeof(Camera));
+		cameraOut.write((char*)&(this->cameraLookingAt), sizeof(Vector3));
+		cameraOut.write((char*)&(this->cameraUp), sizeof(Vector3));
+		cameraOut.close();
+
+		return;
+	}
+
 private:
 	Camera camera;
-	vector<Surface *> surfaces;
+	vector<Surface *>* surfaces;
 	vector<Material> materials;
 	vector<Light> lights;
 	BBVHTree objectTree;
@@ -137,7 +239,7 @@ private:
 					objData.normalList[o->up_normal_index]->e[1],
 					objData.normalList[o->up_normal_index]->e[2]);
 			float rad = upNorm.length();
-			this->surfaces.push_back(
+			this->surfaces->push_back(
 					new Sphere(center, rad, o->material_index));
 		}
 	}
@@ -152,7 +254,7 @@ private:
 						objData.vertexList[o->vertex_index[j]]->e[1],
 						objData.vertexList[o->vertex_index[j]]->e[2]);
 			}
-			this->surfaces.push_back(
+			this->surfaces->push_back(
 					new Triangle(vertices[0], vertices[1], vertices[2],
 							o->material_index));
 		}

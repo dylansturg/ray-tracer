@@ -9,7 +9,6 @@ newmtl ceiling
 Ka  0.5 0.5 0.5 
 Kd  0.4 0.4 0.4
 Ks  0 0 0 
-r 1.0
 d  1
 
 newmtl back
@@ -22,7 +21,6 @@ newmtl green
 Ka  0 0.5 0
 Kd  0 0.5 0
 Ks  0 0 0
-r 0.25
 d  1
 
 newmtl red
@@ -35,7 +33,6 @@ newmtl short_box
 Ka  0.6 0.6 0.6
 Kd  0.5 0.5 0.5
 Ks  0 0 0
-#r 0.75
 d  1
 
 newmtl tall_box

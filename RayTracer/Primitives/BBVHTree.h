@@ -10,52 +10,62 @@ using namespace std;
 class BBVHTree : public Surface
 {
 public:
+	vector<Node>* nodes;
     BBVHTree(vector<Surface *> *sceneObjects)
     {
-        this->root = new Node(sceneObjects, 0, sceneObjects->size());
+		this->nodes = new vector<Node>();
+		this->nodes->push_back(Node(sceneObjects, this->nodes, 0, sceneObjects->size()));
     }
 
     BBVHTree()
     {
-        this->root = NULL;
+
     }
+
+	BBVHTree(vector<Node>* nodes)
+	{
+		this->nodes = nodes;
+	}
 
     ~BBVHTree()
     {
-        if (this->root != NULL)
-            delete this->root;
     }
+
+	vector<Node>* getNodeList(){
+		return this->nodes;
+	}
 
     void initializeTree(vector<Surface *> *sceneObjects)
     {
-        this->root = new Node(sceneObjects, 0, sceneObjects->size());
+		this->nodes = new vector<Node>();
+		this->nodes->push_back(Node(sceneObjects, this->nodes, 0, sceneObjects->size()));
     }
 
     virtual bool intersect(Ray &ray)
     {
-        return this->root->intersect(ray);
+		return this->nodes->at(this->nodes->size() - 1).intersect(ray);
     }
     virtual Vector3 getCenter() const
     {
-        return this->root->getCenter();
+        return this->nodes->at(this->nodes->size() - 1).getCenter();
     }
 
     virtual int height()
     {
-        return this->root->height();
+		return this->nodes->at(this->nodes->size() - 1).height();
     }
 
     virtual Vector3 getMaxBoundaries() const
     {
-        return this->root->getMaxBoundaries();
+		return this->nodes->at(this->nodes->size() - 1).getMaxBoundaries();
     }
     virtual Vector3 getMinBoundaries() const
     {
-        return this->root->getMinBoundaries();
+		return this->nodes->at(this->nodes->size() - 1).getMinBoundaries();
     }
 
 private:
-    Node *root;
+
 };
 
 #endif

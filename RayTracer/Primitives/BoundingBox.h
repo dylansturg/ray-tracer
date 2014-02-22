@@ -7,6 +7,8 @@
 #include "../GenVector.h"
 #include <vector>
 #include <utility>
+#include <cmath>
+#include <algorithm>
 
 using namespace std;
 
