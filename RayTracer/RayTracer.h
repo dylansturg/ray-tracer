@@ -59,7 +59,8 @@ private:
 		unsigned int h = b.getHeight();
 		unsigned int w = b.getWidth();
 		sceneColors.resize(h * w);
-#pragma omp parallel for
+// OpenMP parallel for improves performance, but if building using clang, OMP is not (yet officially) supported
+//#pragma omp parallel for
 		for (int y = 0; y < h; y++) {
 			for (int x = 0; x < w; x++) {
 				Ray r = rg.getRayAt(x, y);
@@ -76,7 +77,7 @@ private:
 			}
 
 		}
-#pragma omp parallel for
+//#pragma omp parallel for
 		for (int y = 1; y <= h; y++) {
 			for (int x = 0; x < w; x++) {
 

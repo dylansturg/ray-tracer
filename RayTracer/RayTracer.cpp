@@ -23,7 +23,7 @@ int main(int argc, char **argv)
     if (argc < 2)
     {
         printf("Need an obj file to load from, using default.\n");
-        fileName = "dragon.obj";
+        fileName = "objs/cornell_box.obj";
     }
     else
     {
@@ -44,31 +44,12 @@ int main(int argc, char **argv)
         writeFileName = writeName;
     }
 
-	int runTimes[FRAME_COUNT];
-
     RayTracer tracer = RayTracer(colorByNormal);
 
-    tracer.processOBJ("dragon.obj");
-	int resolutions[] = { 256, 512, 1024, 2048 };
-	for (int frame = 0; frame < 4; frame++){
+    tracer.processOBJ(fileName);
 
-		tracer.setFrameBuffer(resolutions[frame], resolutions[frame]);
-		for (int i = 0; i < FRAME_COUNT; i++){
-			long startTime = GetElapsedMS();
-
-			tracer.renderRayDirectionsToImage(writeFileName);
-
-			runTimes[i] = GetElapsedMS() - startTime;
-		}
-
-		int sum = 0;
-		for (int i = 0; i < FRAME_COUNT; i++){
-			printf("Run time (%d): %d\n", i, runTimes[i]);
-			sum += runTimes[i];
-		}
-
-		printf("Average: %d\n", sum / FRAME_COUNT);
-	}
+    tracer.setFrameBuffer(res, res);
+    tracer.renderRayDirectionsToImage(writeFileName);
 
     return 0;
 }

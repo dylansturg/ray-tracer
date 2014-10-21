@@ -1,6 +1,11 @@
 #ifndef __SIMPLE_PPM_H
 #define __SIMPLE_PPM_H
 
+/*
+ * Methods to assist with creating a PPM image from a data array.
+ * I (Dylan Sturgeon) did not create any of these methods.
+ */
+
 //write ppm
 int simplePPM_write_ppm(char const * filename, unsigned int width, unsigned int height, unsigned char const * image);
 

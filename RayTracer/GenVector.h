@@ -5,6 +5,15 @@
 #include <stdlib.h>
 #include <math.h>
 
+/*
+ * Note: I (Dylan Sturgeon) did not write or make significant contributions to this class.
+ */
+
+/*
+ * Fixed size array based vector, with utilities.
+ * Author: Micah Taylor
+ */
+
 //enable the padding conversion function - slow
 //#define VECTOR_PADDING_CONVERSION
 

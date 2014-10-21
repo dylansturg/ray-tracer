@@ -118,6 +118,12 @@ public:
 
 	~Scene() {
 		printf("destroying Scene\n");
+		if(this->surfaces != NULL){
+			for(int i=0; i < this->surfaces->size(); i++){
+				delete (*this->surfaces)[i];
+			}
+			delete this->surfaces;
+		}
 	}
 
 	bool intersect(Ray &ray) {

@@ -8,6 +8,15 @@
 #define OBJ_LINE_SIZE 500
 #define MAX_VERTEX_COUNT 4 //can only handle quads or triangles
 
+/*
+ * Note: I (Dylan Sturgeon) did not implement any of the obj/mtl parser.
+ */
+
+/*
+ * Parses and stores OBJ and MTL data for use in the ray tracer.
+ * Author: Micah Taylor
+ */
+
 typedef struct obj_face
 {
 	int vertex_index[MAX_VERTEX_COUNT];
